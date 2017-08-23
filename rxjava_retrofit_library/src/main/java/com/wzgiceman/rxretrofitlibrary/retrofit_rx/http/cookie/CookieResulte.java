@@ -20,11 +20,7 @@ public class CookieResulte {
     private long time;
 
 
-    public CookieResulte(String url, String resulte, long time) {
-        this.url = url;
-        this.resulte = resulte;
-        this.time = time;
-    }
+
 
     @Generated(hash = 2104390000)
     public CookieResulte() {

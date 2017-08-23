@@ -38,7 +38,6 @@ public abstract class BaseActivity extends FragmentActivity {
             public void onNext(String resulte, String endUrl, boolean isCache) {
                 mHttpOnActivityDataListener.onNext(resulte, endUrl);
                 dismissProgressDialog();
-
             }
 
             @Override
@@ -61,6 +60,7 @@ public abstract class BaseActivity extends FragmentActivity {
         if (isRunning) {
             if (null == progressDialog) {
                 progressDialog = new ProgressDialog(this);
+                progressDialog.setMessage("加载中...");
                 progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {

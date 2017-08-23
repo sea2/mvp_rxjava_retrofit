@@ -177,7 +177,7 @@ public class ProgressSubscriber<T> extends Subscriber<T> implements Subscription
                         long time = System.currentTimeMillis();
                        /*保存和更新本地数据*/
                         if (resulte == null) {
-                            resulte = new CookieResulte(api.getUrlAndParams(), t.toString(), time);
+                            resulte = new CookieResulte(null, api.getUrlAndParams(), t.toString(), time);
                             CookieDbUtil.getInstance().saveCookie(resulte);
                             subscriber.onNext(api.getUrlAndParams() + "插入缓存数据");
                             subscriber.onCompleted();
