@@ -7,8 +7,8 @@ import com.wzgiceman.rxretrofitlibrary.retrofit_rx.RxRetrofitApp;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.downlaod.DaoMaster;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.downlaod.DaoSession;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.downlaod.HttpDownManager;
-import com.wzgiceman.rxretrofitlibrary.retrofit_rx.http.cookie.CookieResulte;
-import com.wzgiceman.rxretrofitlibrary.retrofit_rx.http.cookie.CookieResulteDao;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.greendao.entity.CookieResulte;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.greendao.entity.CookieResulteDao;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
@@ -23,7 +23,7 @@ import java.util.List;
 
 public class CookieDbUtil {
     private static CookieDbUtil db;
-    private final static String dbName = "tests_db";
+    private final static String dbName = "http_cache_db";
     private DaoMaster.DevOpenHelper openHelper;
     private Context context;
 

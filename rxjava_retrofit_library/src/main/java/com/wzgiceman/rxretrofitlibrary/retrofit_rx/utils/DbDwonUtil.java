@@ -23,7 +23,7 @@ import java.util.List;
 
 public class DbDwonUtil {
     private static DbDwonUtil db;
-    private final static String dbName = "tests_db";
+    private final static String dbName = "http_cache_db";
     private DaoMaster.DevOpenHelper openHelper;
     private Context context;
 

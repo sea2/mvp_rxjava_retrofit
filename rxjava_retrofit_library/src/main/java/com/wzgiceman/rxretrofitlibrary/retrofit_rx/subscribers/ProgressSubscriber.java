@@ -6,7 +6,7 @@ import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.ApiException;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.CodeException;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.FactoryException;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.HttpTimeException;
-import com.wzgiceman.rxretrofitlibrary.retrofit_rx.http.cookie.CookieResulte;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.greendao.entity.CookieResulte;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.listener.HttpOnNextListener;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.AppUtil;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.CookieDbUtil;
