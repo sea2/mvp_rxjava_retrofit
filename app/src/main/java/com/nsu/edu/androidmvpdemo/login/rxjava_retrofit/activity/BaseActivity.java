@@ -30,24 +30,32 @@ public abstract class BaseActivity extends FragmentActivity {
 
     }
 
-    public void getPostData(Map<String, Object> parametersMap, String url, final HttpOnActivityDataListener mHttpOnActivityDataListener) {
+    protected void getPostData(Map<String, Object> parametersMap, String url) {
         showProgressDialog();
         SubjectPostApi postEntity = new SubjectPostApi(url, parametersMap);
         HttpManager httpManager = new HttpManager(new HttpOnNextListener() {
             @Override
             public void onNext(String resulte, String endUrl, boolean isCache) {
-                mHttpOnActivityDataListener.onNext(resulte, endUrl);
+                onSuccess(resulte, endUrl);
                 dismissProgressDialog();
             }
 
             @Override
             public void onError(ApiException e) {
-                mHttpOnActivityDataListener.onError(e);
+                onErrorException(e);
                 dismissProgressDialog();
 
             }
         });
         httpManager.doHttpDeal(postEntity);
+    }
+
+
+    protected void onSuccess(String resulte, String mothead) {
+    }
+
+
+    protected void onErrorException(ApiException e) {
     }
 
 

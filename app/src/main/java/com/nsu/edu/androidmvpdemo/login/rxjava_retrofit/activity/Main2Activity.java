@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  */
-public class Main2Activity extends BaseActivity implements HttpOnActivityDataListener {
+public class Main2Activity extends BaseActivity  {
 
     private android.widget.TextView tvmain2;
     private android.widget.Button btnrequest;
@@ -36,7 +36,7 @@ public class Main2Activity extends BaseActivity implements HttpOnActivityDataLis
             public void onClick(View view) {
                 Map<String, Object> parametersMap = new HashMap<>();
                 parametersMap.put("username", "刘海洋");
-                getPostData(parametersMap, "app/system/loadConfigItem", Main2Activity.this);
+                getPostData(parametersMap, "app/system/loadConfigItem");
             }
         });
         btnrequest2.setOnClickListener(new View.OnClickListener() {
@@ -66,13 +66,15 @@ public class Main2Activity extends BaseActivity implements HttpOnActivityDataLis
 
 
     @Override
-    public void onNext(String resulte, String mothead) {
+    public void onSuccess(String resulte, String mothead) {
         tvmain2.setText(mothead + "--" + "---" + resulte);
     }
 
 
+
+    //不需要处理失败返回时，可不要
     @Override
-    public void onError(ApiException e) {
+    public void onErrorException(ApiException e) {
         Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
     }
 }
