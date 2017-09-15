@@ -3,7 +3,7 @@ package com.nsu.edu.androidmvpdemo.login.rxjava_retrofit;
 
 import com.google.gson.Gson;
 import com.nsu.edu.androidmvpdemo.login.config.MyConstants;
-import com.nsu.edu.androidmvpdemo.login.util.LogManager;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.LogManager;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.Api.BaseApi;
 
 import java.util.Map;

@@ -51,6 +51,8 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
 
+
+
     protected void onSuccess(String resulte, String mothead) {
     }
 
