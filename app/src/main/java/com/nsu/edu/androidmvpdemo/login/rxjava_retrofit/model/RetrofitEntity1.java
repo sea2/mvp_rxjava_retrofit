@@ -1,4 +1,4 @@
-package com.nsu.edu.androidmvpdemo.login.rxjava_retrofit;
+package com.nsu.edu.androidmvpdemo.login.rxjava_retrofit.model;
 
 import com.google.gson.annotations.SerializedName;
 

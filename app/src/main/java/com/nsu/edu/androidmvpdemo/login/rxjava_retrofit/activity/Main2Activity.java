@@ -18,8 +18,7 @@ import com.wzgiceman.rxretrofitlibrary.retrofit_rx.listener.upload.ProgressReque
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.listener.upload.UploadProgressListener;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.WeakHashMap;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -56,7 +55,7 @@ public class Main2Activity extends BaseActivity {
         btnrequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Map<String, Object> parametersMap = new HashMap<>();
+                WeakHashMap<String, Object> parametersMap = new WeakHashMap<>();
                 parametersMap.put("username", "刘海洋");
                 getPostData(parametersMap, "app/system/loadConfigItem");
             }

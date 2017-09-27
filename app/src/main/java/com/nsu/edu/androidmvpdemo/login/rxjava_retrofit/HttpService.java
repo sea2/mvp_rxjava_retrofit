@@ -1,6 +1,7 @@
 package com.nsu.edu.androidmvpdemo.login.rxjava_retrofit;
 
 import com.nsu.edu.androidmvpdemo.login.rxjava_retrofit.model.BodyInfo1;
+import com.nsu.edu.androidmvpdemo.login.rxjava_retrofit.model.RetrofitEntity1;
 
 import java.util.Map;
 
