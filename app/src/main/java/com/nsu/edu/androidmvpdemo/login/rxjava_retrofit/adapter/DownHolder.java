@@ -120,9 +120,6 @@ public class DownHolder extends BaseViewHolder<DownInfo> implements View.OnClick
             tvMsg.setText("提示:下载中");
             progressBar.setMax((int) countLength);
             progressBar.setProgress((int) readLength);
-
-
-
         }
     };
 }

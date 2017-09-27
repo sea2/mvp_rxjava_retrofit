@@ -6,9 +6,9 @@ import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.HttpTimeException;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.LogManager;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.StringUtils;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -35,7 +35,7 @@ public abstract class BaseApi<T> implements Func1<T, String> {
     private int cookieNoNetWorkTime = 24 * 60 * 60 * 30;
     /*是否是原装Json*/
     private boolean isOriginal = true;
-    public WeakHashMap<String, Object> parametersMap;
+    public Map<String, Object> parametersMap;
 
     /**
      * 设置参数
@@ -62,10 +62,10 @@ public abstract class BaseApi<T> implements Func1<T, String> {
     }
 
 
-    public WeakHashMap<String, Object> getParametersMap() {
-        if (parametersMap == null) parametersMap = new WeakHashMap<>();
+    public Map<String, Object> getParametersMap() {
+        if (parametersMap == null) parametersMap = new HashMap<>();
         parametersMap.put("app_version", "");
-        WeakHashMap<String, Object> params = new WeakHashMap<>();
+        Map<String, Object> params = new HashMap<>();
         if (parametersMap.size() > 0) {
             for (Map.Entry<String, Object> entry : parametersMap.entrySet()) {
                 if ((!StringUtils.isEmpty(entry.getKey())) && entry.getValue() != null) {
@@ -77,7 +77,7 @@ public abstract class BaseApi<T> implements Func1<T, String> {
         return params;
     }
 
-    public void setParametersMap(WeakHashMap<String, Object> parametersMap) {
+    public void setParametersMap(Map<String, Object> parametersMap) {
         this.parametersMap = parametersMap;
     }
 

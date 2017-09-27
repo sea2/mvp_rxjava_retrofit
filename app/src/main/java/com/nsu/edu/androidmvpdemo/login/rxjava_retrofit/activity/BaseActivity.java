@@ -12,7 +12,7 @@ import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.ApiException;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.http.HttpManager;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.listener.HttpOnNextListener;
 
-import java.util.WeakHashMap;
+import java.util.Map;
 
 /**
  * Created by lhy on 2017/8/21.
@@ -30,7 +30,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
     }
 
-    protected void getPostData(WeakHashMap<String, Object> parametersMap, String url) {
+    protected void getPostData(Map<String, Object> parametersMap, String url) {
         showProgressDialog();
         SubjectPostApi postEntity = new SubjectPostApi(url, parametersMap);
         HttpManager httpManager = new HttpManager(new HttpOnNextListener() {
