@@ -30,12 +30,20 @@ public abstract class BaseActivity extends FragmentActivity {
 
     }
 
-    protected void getPostData(Map<String, Object> parametersMap, String url) {
+
+    // -------------------------网络请求-------------------------
+
+
+    protected HttpManager getPostData(Map<String, Object> parametersMap, String url, boolean isShowDialog) {
         showProgressDialog();
+        if (isShowDialog) {
+            showProgressDialog();
+        }
         SubjectPostApi postEntity = new SubjectPostApi(url, parametersMap);
         HttpManager httpManager = new HttpManager(new HttpOnNextListener() {
             @Override
             public void onNext(String resulte, String endUrl, boolean isCache) {
+
                 onSuccess(resulte, endUrl);
                 dismissProgressDialog();
             }
@@ -44,16 +52,15 @@ public abstract class BaseActivity extends FragmentActivity {
             public void onError(ApiException e) {
                 onErrorException(e);
                 dismissProgressDialog();
-
             }
         });
         httpManager.doHttpDeal(postEntity);
+        return httpManager;
     }
 
 
-
-
     protected void onSuccess(String resulte, String mothead) {
+
     }
 
 
