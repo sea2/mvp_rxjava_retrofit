@@ -58,7 +58,7 @@ public class Main2Activity extends BaseActivity {
             public void onClick(View view) {
                 Map<String, Object> parametersMap = new HashMap<>();
                 parametersMap.put("username", "刘海洋");
-                getPostData(parametersMap, "app/system/loadConfigItem");
+                getPostData(parametersMap, "app/system/loadConfigItem",true);
             }
         });
         btnrequest2.setOnClickListener(new View.OnClickListener() {

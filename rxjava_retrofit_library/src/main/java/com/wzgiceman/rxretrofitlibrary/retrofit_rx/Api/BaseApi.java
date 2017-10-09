@@ -35,7 +35,7 @@ public abstract class BaseApi<T> implements Func1<T, String> {
     private int cookieNoNetWorkTime = 24 * 60 * 60 * 30;
     /*是否是原装Json*/
     private boolean isOriginal = true;
-    public Map<String, Object> parametersMap;
+    private Map<String, Object> parametersMap;
 
     /**
      * 设置参数
