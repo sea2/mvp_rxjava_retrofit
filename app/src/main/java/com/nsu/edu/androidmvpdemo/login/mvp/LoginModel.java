@@ -6,4 +6,6 @@ package com.nsu.edu.androidmvpdemo.login.mvp;
  */
 public interface LoginModel {
     void login(String username, String password, OnLoginFinishedListener listener);
+
+    void cancleTasks();
 }

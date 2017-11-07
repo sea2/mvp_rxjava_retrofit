@@ -45,6 +45,7 @@ public class LoginActivity extends Activity implements LoginView, View.OnClickLi
     @Override
     protected void onDestroy() {
         presenter.onDestroy();
+        presenter = null;
         super.onDestroy();
     }
 
@@ -71,7 +72,7 @@ public class LoginActivity extends Activity implements LoginView, View.OnClickLi
     @Override
     public void navigateToHome() {
 // TODO       startActivity(new Intent(this, MainActivity.class));
-        Toast.makeText(this,"login success",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "login success", Toast.LENGTH_SHORT).show();
 //        finish();
     }
 

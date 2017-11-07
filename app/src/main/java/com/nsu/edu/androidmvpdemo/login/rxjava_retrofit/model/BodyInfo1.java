@@ -5,8 +5,8 @@ package com.nsu.edu.androidmvpdemo.login.rxjava_retrofit.model;
  */
 
 public class BodyInfo1 {
-   private String key;
-    private  String version;
+    private String key;
+    private String version;
 
     public String getKey() {
         return key;
@@ -24,3 +24,15 @@ public class BodyInfo1 {
         this.version = version;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+

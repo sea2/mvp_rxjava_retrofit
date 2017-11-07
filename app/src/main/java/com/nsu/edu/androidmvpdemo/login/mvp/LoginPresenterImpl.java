@@ -30,6 +30,10 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     @Override
     public void onDestroy() {
         loginView = null;
+        if(loginModel != null) {
+            loginModel.cancleTasks();
+            loginModel = null;
+        }
     }
 
     @Override

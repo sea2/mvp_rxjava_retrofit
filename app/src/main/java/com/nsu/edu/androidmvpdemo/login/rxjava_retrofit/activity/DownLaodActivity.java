@@ -37,7 +37,7 @@ public class DownLaodActivity extends BaseActivity{
                     "http://img3.redocn.com/tupian/20150430/mantenghuawenmodianshiliangbeijing_3924704.jpg"};
             for (int i = 0; i < downUrl.length; i++) {
                 File outputFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                        "test"+i + ".apk");
+                        "test"+i + ".png");
                 DownInfo apkApi=new DownInfo(downUrl[i]);
                 apkApi.setId(i);
                 apkApi.setState(DownState.START);
