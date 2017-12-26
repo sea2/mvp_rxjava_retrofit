@@ -39,6 +39,7 @@ public class Main2Activity extends BaseActivity {
     private com.daimajia.numberprogressbar.NumberProgressBar progressBar;
     private TextView tvMsg;
     private android.widget.ImageView img;
+    String text = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +59,8 @@ public class Main2Activity extends BaseActivity {
             public void onClick(View view) {
                 Map<String, Object> parametersMap = new HashMap<>();
                 parametersMap.put("username", "刘海洋");
-                getPostData(parametersMap, "app/system/loadConfigItem",true);
+                getPostData(parametersMap, "app/system/loadConfigItem", true);
+                getPostData(parametersMap, "app/product/appointmentInvestProList", true);
             }
         });
         btnrequest2.setOnClickListener(new View.OnClickListener() {
@@ -84,7 +86,8 @@ public class Main2Activity extends BaseActivity {
 
     @Override
     public void onSuccess(String resulte, String mothead) {
-        tvmain2.setText(mothead + "--" + "---" + resulte);
+        text = resulte + "\n" + text;
+        tvmain2.setText("\n----" +mothead + "--" + "---" + text);
     }
 
 
@@ -152,5 +155,6 @@ public class Main2Activity extends BaseActivity {
 
         }
     };
+
 
 }

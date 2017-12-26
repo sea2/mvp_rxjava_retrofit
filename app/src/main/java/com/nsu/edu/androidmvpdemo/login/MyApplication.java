@@ -18,6 +18,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         app = getApplicationContext();
-        RxRetrofitApp.init(this, (MyConstants.AppRunModel != MyConstants.RunModel.PRO));
+        RxRetrofitApp.init(this, (MyConstants.AppRunModel != MyConstants.RunModel.PRO),MyConstants.getHost());
     }
+
 }

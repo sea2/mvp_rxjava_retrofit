@@ -1,6 +1,5 @@
 package com.nsu.edu.androidmvpdemo.login.mvp;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -22,12 +21,11 @@ import com.nsu.edu.androidmvpdemo.R;
  * OnLoginFinishedListener回调通知LoginPresenter，LoginPresenter再把结果返回给view层的Activity，
  * 最后activity显示结果
  */
-public class LoginActivity extends Activity implements LoginView, View.OnClickListener {
+public class LoginActivity extends BaseActivity<LoginView, LoginPresenter> implements LoginView, View.OnClickListener {
 
     private ProgressBar progressBar;
     private EditText username;
     private EditText password;
-    private LoginPresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,14 +37,18 @@ public class LoginActivity extends Activity implements LoginView, View.OnClickLi
         password = (EditText) findViewById(R.id.password);
         findViewById(R.id.button).setOnClickListener(this);
 
-        presenter = new LoginPresenterImpl(this);
     }
 
     @Override
     protected void onDestroy() {
-        presenter.onDestroy();
-        presenter = null;
+        mPresenter.onDestroy();
+        mPresenter = null;
         super.onDestroy();
+    }
+
+    @Override
+    public LoginPresenter createPresenter() {
+        return new LoginPresenter(this);
     }
 
     @Override
@@ -78,7 +80,7 @@ public class LoginActivity extends Activity implements LoginView, View.OnClickLi
 
     @Override
     public void onClick(View v) {
-        presenter.validateCredentials(username.getText().toString(), password.getText().toString());
+        mPresenter.validateCredentials(username.getText().toString(), password.getText().toString());
     }
 
 }
