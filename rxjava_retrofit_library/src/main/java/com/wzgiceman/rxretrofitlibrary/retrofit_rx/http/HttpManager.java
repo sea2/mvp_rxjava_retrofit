@@ -85,7 +85,7 @@ public class HttpManager {
                 /*失败后的retry配置*/
                 .retryWhen(new RetryWhenNetworkException())
                 /*异常处理*/
-                .onErrorResumeNext(funcException)
+                //.onErrorResumeNext(funcException)
                 /*http请求线程*/
                 .subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
@@ -108,6 +108,9 @@ public class HttpManager {
             if (!subscriber.isUnsubscribed())
                 subscriber.unsubscribe();
         }
+
+
+
     }
 
     /**
