@@ -7,21 +7,6 @@ import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.ApiException;
  * Created by WZG on 2016/7/16.
  */
 public interface HttpOnNextListener {
+    void onComplete(String result, String endUrl, boolean isCache, ApiException e);
 
-    /**
-     * 成功后回调方法
-     *
-     * @param resulte
-     * @param endUrl
-     */
-    void onNext(String resulte, String endUrl, boolean isCache);
-
-    /**
-     * 失败
-     * 失败或者错误方法
-     * 自定义异常处理
-     *
-     * @param e
-     */
-    void onError(ApiException e);
 }

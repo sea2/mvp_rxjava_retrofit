@@ -10,15 +10,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 import retrofit2.Retrofit;
-import rx.Observable;
-import rx.functions.Func1;
 
 /**
  * 请求数据统一封装类
  * Created by WZG on 2016/7/16.
  */
-public abstract class BaseApi<T> implements Func1<T, String> {
+public abstract class BaseApi implements Function<String, String> {
     /*是否能取消加载框*/
     private boolean cancel = false;
     /*是否显示加载框*/
@@ -35,7 +35,7 @@ public abstract class BaseApi<T> implements Func1<T, String> {
     private int cookieNoNetWorkTime = 24 * 60 * 60 * 30;
     /*是否是原装Json*/
     private boolean isOriginal = true;
-    private Map<String, Object> parametersMap;
+    private HashMap<String, String> parametersMap;
 
     /**
      * 设置参数
@@ -43,7 +43,7 @@ public abstract class BaseApi<T> implements Func1<T, String> {
      * @param retrofit
      * @return
      */
-    public abstract Observable getObservable(Retrofit retrofit);
+    public abstract Observable<String> getObservable(Retrofit retrofit);
 
     public boolean isOriginal() {
         return isOriginal;
@@ -62,14 +62,14 @@ public abstract class BaseApi<T> implements Func1<T, String> {
     }
 
 
-    public Map<String, Object> getParametersMap() {
+    public HashMap<String, String> getParametersMap() {
         if (parametersMap == null) parametersMap = new HashMap<>();
-        parametersMap.put("app_version", "");
-        Map<String, Object> params = new HashMap<>();
+        parametersMap.put("app_version", "12");
+        HashMap<String, String> params = new HashMap<>();
         if (parametersMap.size() > 0) {
-            for (Map.Entry<String, Object> entry : parametersMap.entrySet()) {
+            for (Map.Entry<String, String> entry : parametersMap.entrySet()) {
                 if ((!StringUtils.isEmpty(entry.getKey())) && entry.getValue() != null) {
-                    if (entry.getValue() instanceof String) params.put(entry.getKey().trim(), entry.getValue().toString().trim());
+                    if (entry.getValue() instanceof String) params.put(entry.getKey().trim(), entry.getValue().trim());
                     else params.put(entry.getKey().trim(), entry.getValue());
                 }
             }
@@ -77,7 +77,7 @@ public abstract class BaseApi<T> implements Func1<T, String> {
         return params;
     }
 
-    public void setParametersMap(Map<String, Object> parametersMap) {
+    public void setParametersMap(HashMap<String, String> parametersMap) {
         this.parametersMap = parametersMap;
     }
 
@@ -113,12 +113,12 @@ public abstract class BaseApi<T> implements Func1<T, String> {
     public String getUrlAndParams(String uri) {
         StringBuilder strBuffer = new StringBuilder();
         strBuffer.append(uri);
-        Map<String, Object> map = getParametersMap();
+        Map<String, String> map = getParametersMap();
         if (map != null && map.size() > 0) {
             strBuffer.append("?");
-            Iterator<Map.Entry<String, Object>> iter = map.entrySet().iterator();
+            Iterator<Map.Entry<String, String>> iter = map.entrySet().iterator();
             while (iter.hasNext()) {
-                Map.Entry<String, Object> entry = iter.next();
+                Map.Entry<String, String> entry = iter.next();
                 if (iter.hasNext()) {
                     if ((!StringUtils.isEmpty(entry.getKey())) && entry.getValue() != null)
                         strBuffer.append(entry.getKey().concat("=" + entry.getValue() + "&"));
@@ -163,23 +163,23 @@ public abstract class BaseApi<T> implements Func1<T, String> {
         this.cancel = cancel;
     }
 
+
     @Override
-    public String call(T httpResult) {
+    public String apply(String httpResult) {
         LogManager.i("http——BaseApi", "----------------------------------------------------------------------------------------------------------------");
         LogManager.i("http——BaseApi", "* " + getUrl() + "\n* 参数：" + getParametersMap().toString() + "\n* 返回结果：" + httpResult.toString());
         LogManager.i("http——BaseApi", "----------------------------------------------------------------------------------------------------------------");
 
-
         if (isOriginal()) {//返回原装json
-            return httpResult.toString();
+            return httpResult;
         } else {
             Gson gson = new Gson();
-            BaseResultEntity baseResulte = gson.fromJson(httpResult.toString(), new TypeToken<BaseResultEntity>() {
+            BaseResultEntity baseResult = gson.fromJson(httpResult, new TypeToken<BaseResultEntity>() {
             }.getType());
-            if (baseResulte.getRet() == 0) {
-                throw new HttpTimeException(baseResulte.getMsg());
+            if (baseResult.getRet() == 0) {
+                throw new HttpTimeException(baseResult.getMsg());
             }
-            return baseResulte.getData();
+            return baseResult.getData();
         }
     }
 }

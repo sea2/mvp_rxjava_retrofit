@@ -6,11 +6,11 @@ import com.wzgiceman.rxretrofitlibrary.retrofit_rx.Api.BaseApi;
 import java.io.File;
 import java.util.HashMap;
 
+import io.reactivex.Observable;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
-import rx.Observable;
 
 /**
  * Created by lhy on 2017/8/18.

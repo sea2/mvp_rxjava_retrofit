@@ -2,11 +2,11 @@ package com.nsu.edu.androidmvpdemo.login.rxjava_retrofit;
 
 import java.util.Map;
 
+import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.HeaderMap;
 import retrofit2.http.Path;
 import retrofit2.http.QueryMap;
-import rx.Observable;
 
 /**
  * Created by lhy on 2017/8/18.

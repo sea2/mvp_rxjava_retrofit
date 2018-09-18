@@ -1,6 +1,7 @@
 package com.wzgiceman.rxretrofitlibrary.retrofit_rx;
 
 import android.app.Application;
+import android.content.Context;
 
 /**
  * 全局app
@@ -20,6 +21,10 @@ public class RxRetrofitApp {
 
     public static Application getApplication() {
         return application;
+    }
+
+    public static Context getContext() {
+        return application.getApplicationContext();
     }
 
     private static void setApplication(Application application) {

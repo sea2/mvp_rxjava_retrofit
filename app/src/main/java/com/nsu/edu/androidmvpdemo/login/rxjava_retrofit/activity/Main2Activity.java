@@ -16,17 +16,18 @@ import com.wzgiceman.rxretrofitlibrary.retrofit_rx.http.HttpManager;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.listener.HttpOnNextListener;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.listener.upload.ProgressRequestBody;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.listener.upload.UploadProgressListener;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.StringUtils;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.Map;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 /**
  */
@@ -57,10 +58,9 @@ public class Main2Activity extends BaseActivity {
         btnrequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Map<String, Object> parametersMap = new HashMap<>();
+                HashMap<String, String> parametersMap = new HashMap<>();
                 parametersMap.put("username", "刘海洋");
-                getPostData(parametersMap, "app/system/loadConfigItem", true);
-                getPostData(parametersMap, "app/product/appointmentInvestProList", true);
+                getPostData(parametersMap, "app/account/databytype", true);
             }
         });
         btnrequest2.setOnClickListener(new View.OnClickListener() {
@@ -85,18 +85,16 @@ public class Main2Activity extends BaseActivity {
 
 
     @Override
-    public void onSuccess(String resulte, String mothead) {
-        text = resulte + "\n" + text;
-        tvmain2.setText("\n----" +mothead + "--" + "---" + text);
+    public void onComplete(String result, String endUrl, boolean isCache, ApiException e) {
+        if (StringUtils.isNotEmpty(result)) {
+            text = result + "\n" + text;
+            tvmain2.setText("\n----" + endUrl + "--" + "---" + text);
+        } else {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+
+        super.onComplete(result, endUrl, isCache, e);
     }
-
-
-    //不需要处理失败返回时，可不要
-    @Override
-    public void onErrorException(ApiException e) {
-        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-    }
-
 
     /*********************************************文件上传***************************************************/
 
@@ -108,11 +106,10 @@ public class Main2Activity extends BaseActivity {
                     @Override
                     public void onProgress(final long currentBytesCount, final long totalBytesCount) {
 
-                /*回到主线程中，可通过timer等延迟或者循环避免快速刷新数据*/
-                        Observable.just(currentBytesCount).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Long>() {
-
+                        /*回到主线程中，可通过timer等延迟或者循环避免快速刷新数据*/
+                        Disposable disposable = Observable.just(currentBytesCount).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<Long>() {
                             @Override
-                            public void call(Long aLong) {
+                            public void accept(Long aLong) throws Exception {
                                 tvMsg.setText("提示:上传中");
                                 progressBar.setMax((int) totalBytesCount);
                                 progressBar.setProgress((int) currentBytesCount);
@@ -122,39 +119,14 @@ public class Main2Activity extends BaseActivity {
                 }));
         UploadApi uplaodApi = new UploadApi();
         uplaodApi.setPart(part);
-        HttpManager httpManager = new HttpManager(new HttpOnNextListener() {
+        HttpManager httpManager = new HttpManager();
+        httpManager.doHttpDeal(uplaodApi, new HttpOnNextListener() {
             @Override
-            public void onNext(String resulte, String endUrl, boolean isCache) {
-                onSuccess(resulte, endUrl);
-                dismissProgressDialog();
-            }
-
-            @Override
-            public void onError(ApiException e) {
-                onErrorException(e);
-                dismissProgressDialog();
+            public void onComplete(String result, String endUrl, boolean isCache, ApiException e) {
 
             }
         });
-        httpManager.doHttpDeal(uplaodApi);
     }
-
-
-    /**
-     * 上传回调
-     */
-    HttpOnNextListener httpOnNextListener = new HttpOnNextListener() {
-
-        @Override
-        public void onNext(String resulte, String endUrl, boolean isCache) {
-
-        }
-
-        @Override
-        public void onError(ApiException e) {
-
-        }
-    };
 
 
 }

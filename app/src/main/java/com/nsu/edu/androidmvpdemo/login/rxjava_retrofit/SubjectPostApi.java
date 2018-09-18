@@ -3,14 +3,14 @@ package com.nsu.edu.androidmvpdemo.login.rxjava_retrofit;
 
 import com.google.gson.Gson;
 import com.nsu.edu.androidmvpdemo.login.config.MyConstants;
-import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.LogManager;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.Api.BaseApi;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.LogManager;
 
-import java.util.Map;
+import java.util.HashMap;
 
+import io.reactivex.Observable;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
-import rx.Observable;
 
 /**
  * 测试数据
@@ -24,18 +24,18 @@ public class SubjectPostApi extends BaseApi {
      * 可以额外设置请求设置加载框显示，回调等（可扩展）
      * 设置可查看BaseApi
      */
-    public SubjectPostApi(String endUrl, Map<String, Object> map) {
+    public SubjectPostApi(String endUrl, HashMap<String, String> map) {
         setBaseUrl(MyConstants.getHost());
         setShowProgress(true);
         setCancel(true);
-        setCache(true);
+        setCache(false);
         setEndUrl(endUrl);
         setParametersMap(map);
     }
 
 
     @Override
-    public Observable getObservable(Retrofit retrofit) {
+    public Observable<String> getObservable(Retrofit retrofit) {
         Gson gson = new Gson();
         String strEntity = gson.toJson(getParametersMap());
         LogManager.i("http", "----------------------------------------------------------------------------------------------------------------");

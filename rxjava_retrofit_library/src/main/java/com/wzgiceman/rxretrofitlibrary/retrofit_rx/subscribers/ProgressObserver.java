@@ -11,24 +11,26 @@ import com.wzgiceman.rxretrofitlibrary.retrofit_rx.listener.HttpOnNextListener;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.AppUtil;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.CookieDbUtil;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.LogManager;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.StringUtils;
 
 import java.lang.ref.SoftReference;
 
-import rx.Observable;
-import rx.Observer;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.ResourceObserver;
+import io.reactivex.schedulers.Schedulers;
 
-import static com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.CodeException.NETWORD_ERROR;
 
 /**
  * 统一处理缓存-数据持久化
  * 异常回调
  * Created by WZG on 2016/7/16.
  */
-public class ProgressSubscriber<T> extends Subscriber<T> implements Subscription {
+public class ProgressObserver extends ResourceObserver<String> {
     //    回调接口
     private SoftReference<HttpOnNextListener> mSubscriberOnNextListener;
     /*请求数据*/
@@ -40,7 +42,7 @@ public class ProgressSubscriber<T> extends Subscriber<T> implements Subscription
      *
      * @param api
      */
-    public ProgressSubscriber(BaseApi api, SoftReference<HttpOnNextListener> listenerSoftReference) {
+    public ProgressObserver(BaseApi api, SoftReference<HttpOnNextListener> listenerSoftReference) {
         this.api = api;
         this.mSubscriberOnNextListener = listenerSoftReference;
     }
@@ -52,28 +54,33 @@ public class ProgressSubscriber<T> extends Subscriber<T> implements Subscription
      */
     @Override
     public void onStart() {
+        super.onStart();
         /*缓存并且网络不可以*/
         if (api.isCache() && (!AppUtil.isNetworkAvailable(RxRetrofitApp.getApplication()))) {
-            if (mSubscriberOnNextListener.get() != null)
-                mSubscriberOnNextListener.get().onError(new ApiException(null, NETWORD_ERROR, "当前网络不可用，请检查您的网络设置"));
             //*获取缓存数据*//*
             CookieResulte cookieResulte = CookieDbUtil.getInstance().queryCookieBy(api.getUrlAndParams());
             if (cookieResulte != null) {
                 long time = (System.currentTimeMillis() - cookieResulte.getTime()) / 1000;
                 if (time < api.getCookieNoNetWorkTime()) {
                     if (mSubscriberOnNextListener.get() != null) {
-                        mSubscriberOnNextListener.get().onNext(cookieResulte.getResulte(), api.getEndUrl(), true);
+                        if (StringUtils.isNotEmpty(cookieResulte.getResulte())) {
+                            mSubscriberOnNextListener.get().onComplete(cookieResulte.getResulte(), api.getEndUrl(), true, null);
+                            onComplete();
+                            return;
+                        }
                     }
-                    onCompleted();
-                    unsubscribe();
                 }
+            }
+            if (mSubscriberOnNextListener.get() != null) {
+                mSubscriberOnNextListener.get().onComplete(null, api.getEndUrl(), false, new ApiException(null, CodeException.NETWORD_ERROR, "当前网络不可用，请检查您的网络设置"));
+                onComplete();
             }
         }
     }
 
 
     @Override
-    public void onCompleted() {
+    public void onComplete() {
 
     }
 
@@ -96,20 +103,25 @@ public class ProgressSubscriber<T> extends Subscriber<T> implements Subscription
      * 获取cache数据
      */
     private void getCache() {
-        Observable.just(api.getUrlAndParams()).subscribe(new Subscriber<String>() {
+        Observable.just(api.getUrlAndParams()).subscribe(new Observer<String>() {
             @Override
-            public void onCompleted() {
+            public void onComplete() {
 
             }
 
             @Override
             public void onError(Throwable e) {
-                errorLog(e);
+
+            }
+
+            @Override
+            public void onSubscribe(Disposable d) {
+
             }
 
             @Override
             public void onNext(String s) {
-                  /*获取缓存数据*/
+                /*获取缓存数据*/
                 CookieResulte cookieResulte = CookieDbUtil.getInstance().queryCookieBy(s);
                 if (cookieResulte == null) {
                     throw new HttpTimeException(HttpTimeException.NO_CHACHE_ERROR);
@@ -117,7 +129,7 @@ public class ProgressSubscriber<T> extends Subscriber<T> implements Subscription
                 long time = (System.currentTimeMillis() - cookieResulte.getTime()) / 1000;
                 if (time < api.getCookieNoNetWorkTime()) {
                     if (mSubscriberOnNextListener.get() != null) {
-                        mSubscriberOnNextListener.get().onNext(cookieResulte.getResulte(), api.getEndUrl(), true);
+                        mSubscriberOnNextListener.get().onComplete(cookieResulte.getResulte(), api.getEndUrl(), true, null);
                     }
                 } else {
                     CookieDbUtil.getInstance().deleteCookie(cookieResulte);
@@ -137,19 +149,10 @@ public class ProgressSubscriber<T> extends Subscriber<T> implements Subscription
         HttpOnNextListener httpOnNextListener = mSubscriberOnNextListener.get();
         if (httpOnNextListener == null) return;
         if (!AppUtil.isNetworkAvailable(RxRetrofitApp.getApplication())) {
-            httpOnNextListener.onError(new ApiException(e, NETWORD_ERROR, "当前网络不可用，请检查您的网络设置"));
+            mSubscriberOnNextListener.get().onComplete(null, api.getEndUrl(), false, new ApiException(null, CodeException.NETWORD_ERROR, "当前网络不可用，请检查您的网络设置"));
         } else {
             ApiException mApiException = FactoryException.analysisExcetpion(e);
-            httpOnNextListener.onError(new ApiException(e, mApiException.getCode(), mApiException.getDisplayMessage()));
-        }
-    }
-
-    private void errorLog(Throwable e) {
-        if (!AppUtil.isNetworkAvailable(RxRetrofitApp.getApplication())) {
-            LogManager.i("ProgressSubscriber", CodeException.NETWORD_ERROR + "--当前网络不可用，请检查您的网络设置");
-        } else {
-            ApiException mApiException = FactoryException.analysisExcetpion(e);
-            LogManager.i("ProgressSubscriber", mApiException.getCode() + "--" + mApiException.getDisplayMessage());
+            mSubscriberOnNextListener.get().onComplete(null, api.getEndUrl(), false, new ApiException(null, mApiException.getCode(), mApiException.getDisplayMessage()));
         }
     }
 
@@ -160,54 +163,60 @@ public class ProgressSubscriber<T> extends Subscriber<T> implements Subscription
      * @param t 创建Subscriber时的泛型类型
      */
     @Override
-    public void onNext(final T t) {
+    public void onNext(final String t) {
 
         if (mSubscriberOnNextListener.get() != null) {
-            mSubscriberOnNextListener.get().onNext((String) t, api.getEndUrl(), false);
+            mSubscriberOnNextListener.get().onComplete(t, api.getEndUrl(), true, null);
         }
 
 
-         /*缓存处理*/
+        /*缓存处理*/
         if (api.isCache()) {
-            Observable.create(new Observable.OnSubscribe<String>() {
+            Observable.create(new ObservableOnSubscribe<String>() {
                 @Override
-                public void call(Subscriber<? super String> subscriber) {
+                public void subscribe(ObservableEmitter<String> observableEmitter) {
                     try {
                         CookieResulte resulte = CookieDbUtil.getInstance().queryCookieBy(api.getUrlAndParams());
                         long time = System.currentTimeMillis();
-                       /*保存和更新本地数据*/
+                        /*保存和更新本地数据*/
                         if (resulte == null) {
-                            resulte = new CookieResulte(null, api.getUrlAndParams(), t.toString(), time);
+                            resulte = new CookieResulte(null, api.getUrlAndParams(), t, time);
                             CookieDbUtil.getInstance().saveCookie(resulte);
-                            subscriber.onNext(api.getUrlAndParams() + "插入缓存数据");
-                            subscriber.onCompleted();
+                            observableEmitter.onNext(api.getUrlAndParams() + "插入缓存数据");
+                            observableEmitter.onComplete();
                         } else {
-                            resulte.setResulte(t.toString());
+                            resulte.setResulte(t);
                             resulte.setTime(time);
                             CookieDbUtil.getInstance().updateCookie(resulte);
-                            subscriber.onNext(api.getUrlAndParams() + "更新缓存数据");
-                            subscriber.onCompleted();
+                            observableEmitter.onNext(api.getUrlAndParams() + "更新缓存数据");
+                            observableEmitter.onComplete();
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        subscriber.onNext("缓存失败");
-                        subscriber.onCompleted();
+                        observableEmitter.onNext("缓存失败");
+                        observableEmitter.onComplete();
                     }
-
                 }
             }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe( //此行为订阅,只有真正的被订阅,整个流程才算生效
                     new Observer<String>() {
                         @Override
-                        public void onCompleted() {
-                        }
+                        public void onSubscribe(Disposable d) {
 
-                        @Override
-                        public void onError(Throwable e) {
                         }
 
                         @Override
                         public void onNext(String s) {
                             LogManager.i("ProgressSubscriber_greenDao", s);
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+
+                        }
+
+                        @Override
+                        public void onComplete() {
+
                         }
                     });
 

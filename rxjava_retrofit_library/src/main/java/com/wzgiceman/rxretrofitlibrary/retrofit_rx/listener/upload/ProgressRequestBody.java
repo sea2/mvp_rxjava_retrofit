@@ -2,6 +2,10 @@ package com.wzgiceman.rxretrofitlibrary.retrofit_rx.listener.upload;
 
 import java.io.IOException;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okio.Buffer;
@@ -9,9 +13,6 @@ import okio.BufferedSink;
 import okio.ForwardingSink;
 import okio.Okio;
 import okio.Sink;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 /**
  * 自定义回调加载速度类RequestBody
@@ -30,16 +31,20 @@ public class ProgressRequestBody extends RequestBody {
         this.requestBody = requestBody;
         this.progressListener = progressListener;
     }
+
     /**
      * 重写调用实际的响应体的contentType
+     *
      * @return MediaType
      */
     @Override
     public MediaType contentType() {
         return requestBody.contentType();
     }
+
     /**
      * 重写调用实际的响应体的contentLength
+     *
      * @return contentLength
      * @throws IOException 异常
      */
@@ -47,8 +52,10 @@ public class ProgressRequestBody extends RequestBody {
     public long contentLength() throws IOException {
         return requestBody.contentLength();
     }
+
     /**
      * 重写进行写入
+     *
      * @param sink BufferedSink
      * @throws IOException 异常
      */
@@ -61,8 +68,10 @@ public class ProgressRequestBody extends RequestBody {
         //必须调用flush，否则最后一部分数据可能不会被写入
         bufferedSink.flush();
     }
+
     /**
      * 写入，回调进度接口
+     *
      * @param sink Sink
      * @return Sink
      */
@@ -72,6 +81,7 @@ public class ProgressRequestBody extends RequestBody {
             long writtenBytesCount = 0L;
             //总字节长度，避免多次调用contentLength()方法
             long totalBytesCount = 0L;
+
             @Override
             public void write(Buffer source, long byteCount) throws IOException {
                 super.write(source, byteCount);
@@ -81,9 +91,9 @@ public class ProgressRequestBody extends RequestBody {
                 if (totalBytesCount == 0) {
                     totalBytesCount = contentLength();
                 }
-                Observable.just(writtenBytesCount).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Long>() {
+                Disposable disposable = Observable.just(writtenBytesCount).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<Long>() {
                     @Override
-                    public void call(Long aLong) {
+                    public void accept(Long aLong) throws Exception {
                         progressListener.onProgress(writtenBytesCount, totalBytesCount);
                     }
                 });

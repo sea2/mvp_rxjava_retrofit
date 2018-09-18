@@ -3,6 +3,7 @@ package com.nsu.edu.androidmvpdemo.login;
 import android.app.Application;
 import android.content.Context;
 
+import com.nsu.edu.androidmvpdemo.AppUtils;
 import com.nsu.edu.androidmvpdemo.login.config.MyConstants;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.RxRetrofitApp;
 
@@ -18,7 +19,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         app = getApplicationContext();
-        RxRetrofitApp.init(this, (MyConstants.AppRunModel != MyConstants.RunModel.PRO),MyConstants.getHost());
+        RxRetrofitApp.init(this, AppUtils.isApkInDebug(app), MyConstants.getHost());
     }
 
 }

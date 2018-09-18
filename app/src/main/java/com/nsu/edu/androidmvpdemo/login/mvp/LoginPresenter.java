@@ -9,7 +9,7 @@ package com.nsu.edu.androidmvpdemo.login.mvp;
  * 确保 Model层不直接操作View层。如果没有这一接口在LoginPresenterImpl实现的话，
  * LoginPresenterImpl只 有View和Model的引用那么Model怎么把结果告诉View呢？
  */
-public class LoginPresenter extends  BasePresenter<LoginView> implements ILoginPresenter, OnLoginFinishedListener {
+public class LoginPresenter extends BasePresenter<LoginView> implements ILoginPresenter {
     private LoginView loginView;
     private ILoginModel loginModel;
 
@@ -19,45 +19,28 @@ public class LoginPresenter extends  BasePresenter<LoginView> implements ILoginP
     }
 
 
-
     @Override
     public void validateCredentials(String username, String password) {
         if (loginView != null) {
             loginView.showProgress();
         }
 
-        loginModel.login(username, password, this);
+        loginModel.login(username, password, new LoginModel.LoginModelCallListener() {
+            @Override
+            public void onComplete(boolean isSuccess, String str, Throwable e) {
+                if (loginView != null) loginView.hideProgress();
+            }
+        });
     }
 
     @Override
     public void onDestroy() {
-        loginView = null;
-        if(loginModel != null) {
+        if (loginView != null) loginView = null;
+        if (loginModel != null) {
             loginModel.cancleTasks();
             loginModel = null;
         }
     }
 
-    @Override
-    public void onUsernameError() {
-        if (loginView != null) {
-            loginView.setUsernameError();
-            loginView.hideProgress();
-        }
-    }
 
-    @Override
-    public void onPasswordError() {
-        if (loginView != null) {
-            loginView.setPasswordError();
-            loginView.hideProgress();
-        }
-    }
-
-    @Override
-    public void onSuccess() {
-        if (loginView != null) {
-            loginView.navigateToHome();
-        }
-    }
 }

@@ -2,11 +2,11 @@ package com.nsu.edu.androidmvpdemo.login.rxjava_retrofit;
 
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.Api.BaseApi;
 
+import io.reactivex.Observable;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
-import rx.Observable;
 
 /**
  * 上传请求api

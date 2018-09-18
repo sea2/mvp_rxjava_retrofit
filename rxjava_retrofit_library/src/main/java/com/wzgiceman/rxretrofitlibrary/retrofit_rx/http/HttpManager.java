@@ -2,25 +2,27 @@ package com.wzgiceman.rxretrofitlibrary.retrofit_rx.http;
 
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.Api.BaseApi;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.RxRetrofitApp;
-import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.ApiException;
-import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.CodeException;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.FactoryException;
-import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.RetryWhenNetworkException;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.http.interceptor.CommonParamsInterceptor;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.http.interceptor.HttpHeaderInterceptor;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.listener.HttpOnNextListener;
-import com.wzgiceman.rxretrofitlibrary.retrofit_rx.subscribers.ProgressSubscriber;
-import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.StringUtils;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.subscribers.ProgressObserver;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.RxUtils;
 
 import java.lang.ref.SoftReference;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 
 /**
@@ -30,16 +32,26 @@ import rx.schedulers.Schedulers;
 public class HttpManager {
     /*软引用對象*/
     private SoftReference<HttpOnNextListener> onNextListener;
-    private ProgressSubscriber subscriber;
     private static HttpManager instance;
 
-    /*超时时间-默认6秒*/
-    private int connectionTime = 6;
-    Retrofit retrofit;
+    /*超时时间-默认10秒*/
+    private final int connectionTime = 10;
+    private Retrofit retrofit;
+    private CompositeDisposable compositeDisposable;
 
 
-    public HttpManager(HttpOnNextListener onNextListener) {
-        this.onNextListener = new SoftReference<HttpOnNextListener>(onNextListener);
+    public static HttpManager getInstance() {
+        if (instance == null) {
+            synchronized (HttpManager.class) {
+                if (instance == null) {
+                    instance = new HttpManager();
+                }
+            }
+        }
+        return instance;
+    }
+
+    public HttpManager() {
         init();
     }
 
@@ -48,26 +60,18 @@ public class HttpManager {
         //手动创建一个OkHttpClient并设置超时时间缓存等设置
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(connectionTime, TimeUnit.SECONDS);
+        /*失败后的retry配置*/
+        builder.retryOnConnectionFailure(false);
+        addInterceptor(builder);
 
-        if (StringUtils.isEmpty(RxRetrofitApp.getBaseUrl())) {
-            onNextListener.get().onError(new ApiException(null, CodeException.UNKOWNHOST_ERROR, "baseUrl为空"));
-            return;
-        }
         /*创建retrofit对象*/
         retrofit = new Retrofit.Builder()
                 .client(builder.build())
+                /*http请求线程*/
                 .addConverterFactory(ScalarsConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .baseUrl(RxRetrofitApp.getBaseUrl())
                 .build();
-    }
-
-
-    public static HttpManager getInstance(HttpOnNextListener onNextListener) {
-        if (instance == null) {
-            instance = new HttpManager(onNextListener);
-        }
-        return instance;
     }
 
 
@@ -76,51 +80,79 @@ public class HttpManager {
      *
      * @param basePar 封装的请求数据
      */
-    public ProgressSubscriber doHttpDeal(BaseApi basePar) {
-
-        /*rx处理*/
-        subscriber = new ProgressSubscriber(basePar, onNextListener);
-
-        Observable observable = basePar.getObservable(retrofit)
-                /*失败后的retry配置*/
-                .retryWhen(new RetryWhenNetworkException())
-                /*异常处理*/
-                //.onErrorResumeNext(funcException)
-                /*http请求线程*/
+    public void doHttpDeal(BaseApi basePar, HttpOnNextListener mHttpOnNextListener) {
+        this.onNextListener = new SoftReference<>(mHttpOnNextListener);
+        addSubscribe(basePar.getObservable(retrofit)
+                .compose(RxUtils.handleAllString())
                 .subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
                 /*回调线程*/
                 .observeOn(AndroidSchedulers.mainThread())
                 /*结果判断*/
-                .map(basePar);
-
-        /*数据回调*/
-        observable.subscribe(subscriber);
-        return subscriber;
+                .map(basePar)
+                .subscribeWith(new ProgressObserver(basePar, onNextListener)));
     }
 
 
     /**
-     * 取消订阅
+     * 添加各种拦截器
+     *
+     * @param builder
      */
-    public void doCancel(ProgressSubscriber subscriber) {
-        if (subscriber != null) {
-            if (!subscriber.isUnsubscribed())
-                subscriber.unsubscribe();
+    private void addInterceptor(OkHttpClient.Builder builder) {
+        //公共Header参数插值器
+        builder.addInterceptor(new HttpHeaderInterceptor.Builder().build());
+        //公共参数插值器
+        builder.addInterceptor(new CommonParamsInterceptor());
+
+        //缓存使用拦截器
+      /*  builder.addInterceptor(sRewriteCacheControlInterceptor);
+        builder.addNetworkInterceptor(sRewriteCacheControlInterceptor);
+        builder.cache(new Cache(new File(Utils.getContext().getExternalCacheDir() + "/okHttp_cache"), 1024 * 1024 * 100));*/
+
+
+        // 添加日志拦截器，非debug模式不打印任何日志
+        if (RxRetrofitApp.isDebug()) {
+            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            builder.addInterceptor(loggingInterceptor);
         }
 
+    }
 
 
+    /**
+     * 封装到base里面效果最佳
+     *
+     * @param disposable disposable
+     */
+    private void addSubscribe(Disposable disposable) {
+        if (compositeDisposable == null) {
+            compositeDisposable = new CompositeDisposable();
+        }
+        compositeDisposable.add(disposable);
+    }
+
+
+    /**
+     * 取消所有订阅
+     */
+    public void doCancel() {
+        if (compositeDisposable != null) {
+            compositeDisposable.dispose();
+            compositeDisposable.clear();
+        }
     }
 
     /**
      * 异常处理
      */
-    Func1 funcException = new Func1<Throwable, Observable>() {
+    Function funcException = new Function<Throwable, Observable>() {
         @Override
-        public Observable call(Throwable throwable) {
+        public Observable apply(Throwable throwable) {
             return Observable.error(FactoryException.analysisExcetpion(throwable));
         }
     };
+
 
 }

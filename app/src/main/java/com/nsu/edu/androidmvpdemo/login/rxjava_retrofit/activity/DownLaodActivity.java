@@ -9,6 +9,7 @@ import com.nsu.edu.androidmvpdemo.R;
 import com.nsu.edu.androidmvpdemo.login.rxjava_retrofit.adapter.DownAdapter;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.downlaod.DownInfo;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.downlaod.DownState;
+import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.ApiException;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.utils.DbDwonUtil;
 
 import java.io.File;
@@ -64,5 +65,10 @@ public class DownLaodActivity extends BaseActivity{
         for (DownInfo downInfo : listData) {
             dbUtil.update(downInfo);
         }
+    }
+
+    @Override
+    public void onComplete(String result, String endUrl, boolean isCache, ApiException e) {
+
     }
 }

@@ -11,9 +11,8 @@ import com.nsu.edu.androidmvpdemo.login.rxjava_retrofit.SubjectPostApi;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception.ApiException;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.http.HttpManager;
 import com.wzgiceman.rxretrofitlibrary.retrofit_rx.listener.HttpOnNextListener;
-import com.wzgiceman.rxretrofitlibrary.retrofit_rx.subscribers.ProgressSubscriber;
 
-import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Created by lhy on 2017/8/21.
@@ -35,22 +34,13 @@ public abstract class BaseActivity extends FragmentActivity implements HttpOnNex
     // -------------------------网络请求-------------------------
 
 
-    protected ProgressSubscriber getPostData(Map<String, Object> parametersMap, String url, boolean isShowDialog) {
+    protected void getPostData(HashMap<String, String> parametersMap, String url, boolean isShowDialog) {
         showProgressDialog();
         if (isShowDialog) {
             showProgressDialog();
         }
         SubjectPostApi postEntity = new SubjectPostApi(url, parametersMap);
-      return  HttpManager.getInstance(this).doHttpDeal(postEntity);
-    }
-
-
-    protected void onSuccess(String resulte, String mothead) {
-
-    }
-
-
-    protected void onErrorException(ApiException e) {
+        HttpManager.getInstance().doHttpDeal(postEntity, this);
     }
 
 
@@ -107,6 +97,7 @@ public abstract class BaseActivity extends FragmentActivity implements HttpOnNex
         super.onDestroy();
         isRunning = false;
         dismissProgressDialog();
+        HttpManager.getInstance().doCancel();
 
     }
 
@@ -119,17 +110,7 @@ public abstract class BaseActivity extends FragmentActivity implements HttpOnNex
 
 
     @Override
-    public void onNext(String resulte, String endUrl, boolean isCache) {
-        onSuccess(resulte, endUrl);
+    public void onComplete(String result, String endUrl, boolean isCache, ApiException e) {
         dismissProgressDialog();
     }
-
-    @Override
-    public void onError(ApiException e) {
-        onErrorException(e);
-        dismissProgressDialog();
-    }
-
-
-
 }

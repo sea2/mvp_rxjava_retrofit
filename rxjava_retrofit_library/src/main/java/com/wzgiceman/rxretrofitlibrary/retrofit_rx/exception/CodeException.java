@@ -1,11 +1,5 @@
 package com.wzgiceman.rxretrofitlibrary.retrofit_rx.exception;
 
-import android.support.annotation.IntDef;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-
 /**
  * 自定义错误code类型:注解写法
  * <p>
@@ -29,10 +23,6 @@ public class CodeException {
     public static final int UNKOWNHOST_ERROR = 0x6;
 
 
-    @IntDef({NETWORD_ERROR, HTTP_ERROR, RUNTIME_ERROR, UNKNOWN_ERROR, JSON_ERROR, UNKOWNHOST_ERROR})
-    @Retention(RetentionPolicy.SOURCE)
 
-    public @interface CodeEp {
-    }
 
 }
